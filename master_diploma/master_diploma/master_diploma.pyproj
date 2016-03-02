@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>72fbd4d6-4a15-44cc-8ca5-b38439f3fa50</ProjectGuid>
+    <ProjectGuid>90b55ad5-694d-4044-9985-8641fc6bd227</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>master_diploma.py</StartupFile>
     <SearchPath>
@@ -22,7 +22,13 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="f_matrix_computer.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="master_diploma.py" />
+    <Compile Include="key_points_matcher.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "master_diploma", "master_diploma\master_diploma.pyproj", "{72FBD4D6-4A15-44CC-8CA5-B38439F3FA50}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "master_diploma", "master_diploma\master_diploma.pyproj", "{90B55AD5-694D-4044-9985-8641FC6BD227}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,8 +11,8 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{72FBD4D6-4A15-44CC-8CA5-B38439F3FA50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72FBD4D6-4A15-44CC-8CA5-B38439F3FA50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90B55AD5-694D-4044-9985-8641FC6BD227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90B55AD5-694D-4044-9985-8641FC6BD227}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
