@@ -61,7 +61,7 @@ def debug8Points (image1, image2):
     #keyPoints2 = cv2.goodFeaturesToTrack (image2, 1512, 0.01, 2, useHarrisDetector = True)
     #keyPoints1 = cv2.KeyPoint_convert(keyPoints1)
     #keyPoints2 = cv2.KeyPoint_convert(keyPoints2)
-
+    
     keyPoints1, descriptors1 = kpm.computeDescriptors (image1, keyPoints1)
     keyPoints2, descriptors2 = kpm.computeDescriptors (image2, keyPoints2)
 
@@ -77,6 +77,16 @@ def debug8Points (image1, image2):
     #plt.imshow(image3),plt.show()
 
     fmc.compute (keyPoints1, keyPoints2, matches[:20])
+    
+    pts1, pts2 = [], []
+    for m in matches[:20]:
+        pts2.append (keyPoints2 [m.trainIdx].pt)
+        pts1.append (keyPoints1 [m.queryIdx].pt)
+
+    pts1 = np.int32(pts1)
+    pts2 = np.int32(pts2)
+    F, mask = cv2.findFundamentalMat (pts1, pts2, cv2.FM_LMEDS)
+    print F
 
     #cv2.imshow ('image1', image3)
     #cv2.imshow ('image2', image4)
@@ -84,11 +94,11 @@ def debug8Points (image1, image2):
     pass
 
 if __name__ == "__main__":
-    image1 = cv2.imread ("1.bmp", 0)
-    image2 = cv2.imread ("2.bmp", 0)
+    image1 = cv2.imread ("20160203_155936_left.000100.bmp", 0)
+    image2 = cv2.imread ("20160203_155936_right.000100.bmp", 0)
 
-    pointTracking ('forTracking')
-    #debug8Points (image1, image2)
+    #pointTracking ('forTracking')
+    debug8Points (image1, image2)
 
     cv2.waitKey()
     cv2.destroyAllWindows()
