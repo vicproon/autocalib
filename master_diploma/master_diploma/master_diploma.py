@@ -5,6 +5,30 @@ from matplotlib import pyplot as plt
 
 from f_matrix_computer import f_matrix_computer
 from key_points_matcher import key_points_matcher
+import quality_checker as qch
+
+def drawlines(img1,img2,lines,pts1,pts2):
+    ''' img1 - image on which we draw the epilines for the points in img2
+        lines - corresponding epilines '''
+    r,c = img1.shape
+    img1 = cv2.cvtColor(img1,cv2.COLOR_GRAY2BGR)
+    img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2BGR)
+    for r,pt1,pt2 in zip(lines,pts1,pts2):
+        color = tuple(np.random.randint(0,255,3).tolist())
+        x0,y0 = map(int, [0, -r[2]/r[1] ])
+        x1,y1 = map(int, [c, -(r[2]+r[0]*c)/r[1] ])
+        img1 = cv2.line(img1, (x0,y0), (x1,y1), color,1)
+        img1 = cv2.circle(img1,tuple(pt1),5,color,-1)
+        img2 = cv2.circle(img2,tuple(pt2),5,color,-1)
+    return img1,img2
+
+import yaml
+def opencv_matrix(loader, node):
+    mapping = loader.construct_mapping(node, deep=True)
+    mat = np.array(mapping["data"])
+    mat.resize(mapping["rows"], mapping["cols"])
+    return mat
+yaml.add_constructor(u"tag:yaml.org,2002:opencv-matrix", opencv_matrix)
 
 def pointTracking (imagesFolder):
     images = list()
@@ -67,26 +91,71 @@ def debug8Points (image1, image2):
 
     bf = cv2.BFMatcher (cv2.NORM_HAMMING)
     matches = bf.match (descriptors1, descriptors2)
-    matches = sorted(matches, key = lambda x:x.distance)
+
+    height, width = image1.shape[0], image1.shape[1]
+    vicinityThreshold = (height + width) / 200
+    print 'threshold: ' + str (vicinityThreshold)
+    matches = kpm.pointsFiltering (keyPoints1, keyPoints2, matches, vicinityThreshold)
+    
     #print '\n'.join (str(x.queryIdx) + ' ' + str(x.trainIdx) for x in matches)
 
-    image3 = cv2.drawMatches(image1, keyPoints1, image2, keyPoints2, matches[:20], image3)
+    #image3 = cv2.drawMatches(image1, keyPoints1, image2, keyPoints2, matches[:20], image3)
     #image3 = cv2.drawKeypoints (image1, keyPoints1, image3)
     #image4 = cv2.drawKeypoints (image2, keyPoints1, image4)
 
     #plt.imshow(image3),plt.show()
-
-    fmc.compute (keyPoints1, keyPoints2, matches[:20])
     
+    #Точки для тестирования
     pts1, pts2 = [], []
-    for m in matches[:20]:
+    for m in matches[:30]:
         pts2.append (keyPoints2 [m.trainIdx].pt)
         pts1.append (keyPoints1 [m.queryIdx].pt)
 
     pts1 = np.int32(pts1)
     pts2 = np.int32(pts2)
-    F, mask = cv2.findFundamentalMat (pts1, pts2, cv2.FM_LMEDS)
-    print F
+
+    #Точки для вычислений
+    ptc1, ptc2 = [], []
+    for m in matches[:20]:
+        ptc2.append (keyPoints2 [m.trainIdx].pt)
+        ptc1.append (keyPoints1 [m.queryIdx].pt)
+
+    ptc1 = np.int32(ptc1)
+    ptc2 = np.int32(ptc2)
+    
+    #F, mask = cv2.findFundamentalMat (ptc1, ptc2, cv2.FM_8POINT)
+    F = fmc.compute (ptc1, ptc2)
+    #F = fmc.compute (keyPoints1, keyPoints2, matches)
+    #print 'F: ' + str(F)
+
+    with open ("extrinsics.yml", "r") as file:
+        GTF = yaml.load (file.read ())['F']
+        pass
+
+    print 'Разница норм матриц: '.decode ('utf-8') + str (qch.matrixNormTest (F, GTF))
+    printStr = 'Среднее расстояние между эпиполярными линиями Ground Truth и тестовой матрицами: {0:.3f}\n'
+    printStr = printStr + 'Среднее расстояние между эпиполярными линиями тестовой матрицы: {1:.3f}'
+    print (printStr.format (*qch.epipolAverageDistance (F, GTF)).decode ('utf-8'))
+    print 'Расстояние между точками пересечения эпиполярных линий Ground Truth и тестовой матрицами: '.decode ('utf-8') + str (qch.centerPointsTest (F, GTF))
+    
+    #print line
+    #print GTLine
+
+    # Find epilines corresponding to points in right image (second image) and
+    # drawing its lines on left image
+    lines1 = cv2.computeCorrespondEpilines (pts2.reshape(-1,1,2), 2,F)
+    lines1 = lines1.reshape (-1,3)
+    img5,img6 = drawlines (image1, image2, lines1, pts1, pts2)
+
+    # Find epilines corresponding to points in left image (first image) and
+    # drawing its lines on right image
+    lines2 = cv2.computeCorrespondEpilines (pts1.reshape(-1,1,2), 1,F)
+    lines2 = lines2.reshape (-1,3)
+    img3,img4 = drawlines (image2, image1, lines2, pts2, pts1)
+
+    plt.subplot(121),plt.imshow(img5)
+    plt.subplot(122),plt.imshow(img3)
+    plt.show()
 
     #cv2.imshow ('image1', image3)
     #cv2.imshow ('image2', image4)
@@ -96,6 +165,7 @@ def debug8Points (image1, image2):
 if __name__ == "__main__":
     image1 = cv2.imread ("20160203_155936_left.000100.bmp", 0)
     image2 = cv2.imread ("20160203_155936_right.000100.bmp", 0)
+    #image2 = cv2.imread ("20160203_155936_left.000100.bmp", 0)
 
     #pointTracking ('forTracking')
     debug8Points (image1, image2)
