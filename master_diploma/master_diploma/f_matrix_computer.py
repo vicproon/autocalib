@@ -1,16 +1,17 @@
 ﻿import cv2
 import numpy as np
 import scipy.sparse.linalg as linalg
+import logging as log
 
 class f_matrix_computer(object):
     """description of class"""
-    def compute (self, keyPoints1, keyPoints2):#, matches):
-        KPChoose = self.__transformKeyPoints (keyPoints1, keyPoints2)#, matches)
+    def compute (self, keyPoints1, keyPoints2):
+        KPChoose = self.__transformKeyPoints (keyPoints1, keyPoints2)
         KPChoose1, trMatrices = self.__normalization (KPChoose)
 
         #F = self.__matrixCalculation (KPChoose[:8], True)
         F = trMatrices[0].transpose() * self.__matrixCalculation (KPChoose1) * trMatrices[1]
-        #F1 = self.__matrixCalculation (KPChoose1)
+        #F1 = self.__matrixCalculation (KPChoose)
         #print F
         
         return F.transpose()
